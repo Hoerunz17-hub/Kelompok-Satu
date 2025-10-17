@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="d-xl-flex justify-content-between align-items-start">
-            <h2 class="text-dark font-weight-bold mb-2"> Kelompok 1 </h2>
+            <h2 class="text-dark font-weight-bold mb-2"> Service Laptop Source </h2>
         </div>
         <div class="row">
             <div class="col-md-12">
@@ -21,48 +21,48 @@
                             <!-- Total Service -->
                             <div class="col-xl-3 col-lg-6 col-sm-6 grid-margin stretch-card">
                                 <div class="card">
-                                    <div class="card-body text-center">
+                                    <div
+                                        class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                                         <h5 class="mb-2 text-dark font-weight-normal">Total Service</h5>
                                         <h2 class="mb-4 text-dark font-weight-bold">{{ $totalService }}</h2>
-                                        <div
-                                            class="dashboard-progress dashboard-progress-1 d-flex align-items-center justify-content-center item-parent">
-                                            <i class="mdi mdi-laptop icon-lg absolute-center text-primary"></i>
+                                        <!-- ubah mb-3 ke mb-4 -->
+                                        <div class="dashboard-progress dashboard-progress-1 d-flex align-items-center justify-content-center"
+                                            style="width:90px; height:90px; position:relative;">
+                                            <i class="mdi mdi-laptop text-primary"
+                                                style="font-size:38px; position:absolute;"></i>
                                         </div>
-                                        <p class="mt-4 mb-0">Completed Services</p>
-                                        <h3 class="mb-0 font-weight-bold mt-2 text-dark">{{ $completedService }}
-                                            ({{ $completedPercent }}%)</h3>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Total Customer -->
+                            <!-- Total Customers -->
                             <div class="col-xl-3 col-lg-6 col-sm-6 grid-margin stretch-card">
                                 <div class="card">
-                                    <div class="card-body text-center">
+                                    <div
+                                        class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                                         <h5 class="mb-2 text-dark font-weight-normal">Total Customers</h5>
                                         <h2 class="mb-4 text-dark font-weight-bold">{{ $totalCustomer }}</h2>
-                                        <div
-                                            class="dashboard-progress dashboard-progress-2 d-flex align-items-center justify-content-center item-parent">
-                                            <i class="mdi mdi-account-group icon-lg absolute-center text-success"></i>
+                                        <div class="dashboard-progress dashboard-progress-2 d-flex align-items-center justify-content-center"
+                                            style="width:90px; height:90px; position:relative;">
+                                            <i class="mdi mdi-account-group text-success"
+                                                style="font-size:38px; position:absolute;"></i>
                                         </div>
-                                        <p class="mt-4 mb-0">Customers</p>
-                                        <h3 class="mb-0 font-weight-bold mt-2 text-dark">{{ $totalCustomer }}</h3>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Total Technician -->
+                            <!-- Total Technicians -->
                             <div class="col-xl-3 col-lg-6 col-sm-6 grid-margin stretch-card">
                                 <div class="card">
-                                    <div class="card-body text-center">
+                                    <div
+                                        class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                                         <h5 class="mb-2 text-dark font-weight-normal">Total Technicians</h5>
                                         <h2 class="mb-4 text-dark font-weight-bold">{{ $totalTechnician }}</h2>
-                                        <div
-                                            class="dashboard-progress dashboard-progress-3 d-flex align-items-center justify-content-center item-parent">
-                                            <i class="mdi mdi-wrench icon-lg absolute-center text-warning"></i>
+                                        <div class="dashboard-progress dashboard-progress-3 d-flex align-items-center justify-content-center"
+                                            style="width:90px; height:90px; position:relative;">
+                                            <i class="mdi mdi-wrench text-warning"
+                                                style="font-size:38px; position:absolute;"></i>
                                         </div>
-                                        <p class="mt-4 mb-0">Active Technicians</p>
-                                        <h3 class="mb-0 font-weight-bold mt-2 text-dark">{{ $totalTechnician }}</h3>
                                     </div>
                                 </div>
                             </div>
@@ -70,21 +70,23 @@
                             <!-- Total Revenue -->
                             <div class="col-xl-3 col-lg-6 col-sm-6 grid-margin stretch-card">
                                 <div class="card">
-                                    <div class="card-body text-center">
+                                    <div
+                                        class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                                         <h5 class="mb-2 text-dark font-weight-normal">Total Revenue</h5>
                                         <h2 class="mb-4 text-dark font-weight-bold">Rp
                                             {{ number_format($totalRevenue, 0, ',', '.') }}</h2>
-                                        <div
-                                            class="dashboard-progress dashboard-progress-4 d-flex align-items-center justify-content-center item-parent">
-                                            <i class="mdi mdi-cash-multiple icon-lg absolute-center text-danger"></i>
+                                        <div class="dashboard-progress dashboard-progress-4 d-flex align-items-center justify-content-center"
+                                            style="width:90px; height:90px; position:relative;">
+                                            <i class="mdi mdi-cash-multiple text-danger"
+                                                style="font-size:38px; position:absolute;"></i>
                                         </div>
-                                        <p class="mt-4 mb-0">Since Beginning</p>
-                                        <h3 class="mb-0 font-weight-bold mt-2 text-dark">{{ round($totalRevenue / 1000) }}k
-                                        </h3>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+
+
 
 
 

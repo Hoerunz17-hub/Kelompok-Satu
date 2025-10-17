@@ -110,49 +110,45 @@ class ServiceBackendController extends Controller
             return view('pages.service.detail', compact('service'));
         }
 
-    public function updatePayment(Request $request, $id)
+   public function updatePayment(Request $request, $id)
 {
     $service = Services::findOrFail($id);
 
+    // Fungsi untuk membersihkan angka dari format rupiah
     $clean = fn($val) => (float) str_replace(['.', ','], ['', '.'], preg_replace('/[^\d.,]/', '', $val ?? '0'));
 
-    $action = $request->input('action');
-
-    if ($action === 'status') {
-        $request->validate(['status' => 'required|string']);
-        $service->update(['status' => $request->status]);
-        return redirect()->back()->with('success', 'Status service berhasil diperbarui!');
-    }
-
-    // Update payment + status
     $totalPrice = $service->details->sum('price');
     $otherCost = $clean($request->other_cost);
-    $paid = $clean($request->paid);
+    $paidNow = $clean($request->paid); // jumlah yang baru diinput user
+    $paidBefore = $service->paid ?? 0; // total yang sudah pernah dibayar
+    $newPaid = $paidBefore + $paidNow; // total keseluruhan pembayaran setelah ditambah
+
     $grandTotal = $totalPrice + $otherCost;
 
-   // Tentukan status pembayaran otomatis
-if ($paid <= 0) {
-    $statusPaid = 'unpaid'; // Belum bayar sama sekali
-} elseif ($paid < $grandTotal) {
-    $statusPaid = 'debt'; // Nyicil / belum lunas
-} else {
-    $statusPaid = 'paid'; // Sudah lunas
-}
+    // Hitung kembalian (jika bayar lebih)
+    $change = max(0, $newPaid - $grandTotal);
 
+    // Tentukan status pembayaran otomatis
+    if ($newPaid <= 0) {
+        $statusPaid = 'unpaid'; // Belum bayar sama sekali
+    } elseif ($newPaid < $grandTotal) {
+        $statusPaid = 'debt'; // Belum lunas
+    } else {
+        $statusPaid = 'paid'; // Sudah lunas
+    }
 
-   $change = max(0, $paid - $grandTotal);
+    // Update data service
+    $service->update([
+        'status' => $request->status,
+        'paymentmethod' => $request->paymentmethod,
+        'other_cost' => $otherCost,
+        'paid' => $newPaid, // total keseluruhan setelah ditambah
+        'change' => $change,
+        'estimated_cost' => $grandTotal,
+        'status_paid' => $statusPaid,
+    ]);
 
-$service->update([
-    'status' => $request->status,
-    'paymentmethod' => $request->paymentmethod,
-    'other_cost' => $otherCost,
-    'paid' => $paid,
-    'change' => $change,
-    'estimated_cost' => $grandTotal,
-    'status_paid' => $statusPaid,
-]);
-
-    return redirect('/service')->with('success', 'Payment updated successfully!');
+    return redirect('/service')->with('success', 'Pembayaran berhasil diperbarui! Kembalian: Rp ' . number_format($change, 0, ',', '.'));
 }
 
 
