@@ -117,8 +117,7 @@ class UserBackendController extends Controller
     }
     public function show($id)
 {
-    $user = Usertiga::find($id);
-
+  $user = Usertiga::with(['customerServices.laptop', 'technicianServices.laptop'])->find($id);
     if (!$user) {
         return redirect('/user')->with('error', 'Data Tidak Ditemukan');
     }
