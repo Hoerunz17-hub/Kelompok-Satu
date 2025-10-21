@@ -86,6 +86,23 @@
             }
         }
 
+        // $('[data-toggle="minimize"]').on("click", function () {
+        //     if (
+        //         body.hasClass("sidebar-toggle-display") ||
+        //         body.hasClass("sidebar-absolute")
+        //     ) {
+        //         body.toggleClass("sidebar-hidden");
+        //     } else {
+        //         body.toggleClass("sidebar-icon-only");
+        //     }
+        // });
+
+        // === Sidebar minimize toggle + simpan state ke localStorage ===
+        // Cek dulu kondisi terakhir saat halaman diload
+        if (localStorage.getItem("sidebar-collapsed") === "true") {
+            body.addClass("sidebar-icon-only");
+        }
+
         $('[data-toggle="minimize"]').on("click", function () {
             if (
                 body.hasClass("sidebar-toggle-display") ||
@@ -95,6 +112,12 @@
             } else {
                 body.toggleClass("sidebar-icon-only");
             }
+
+            // ⬇️ Tambahan ini: simpan kondisi ke localStorage
+            localStorage.setItem(
+                "sidebar-collapsed",
+                body.hasClass("sidebar-icon-only")
+            );
         });
 
         //checkbox and radios
