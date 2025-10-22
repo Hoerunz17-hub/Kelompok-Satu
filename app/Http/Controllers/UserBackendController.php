@@ -50,7 +50,7 @@ class UserBackendController extends Controller
 
         Usertiga::create($data);
 
-        return redirect('/user')->with('success', 'Data Berhasil Ditambahkan');
+        return redirect('/user')->with('success', 'Users Berhasil Ditambahkan');
     }
 
     public function edit($id)
@@ -98,7 +98,7 @@ class UserBackendController extends Controller
 
         $user->update($dataUpdate);
 
-        return redirect('/user')->with('success', 'Data Berhasil Diupdate');
+        return redirect('/user')->with('success', 'users Berhasil Diupdate');
     }
 
     public function destroy($id)
@@ -110,7 +110,7 @@ class UserBackendController extends Controller
                 Storage::disk('public')->delete($user->image);
             }
             $user->delete();
-            return redirect('/user')->with('success', 'Data Berhasil Dihapus');
+            return redirect('/user')->with('success', 'Users Berhasil Dihapus');
         }
 
         return redirect('/user')->with('error', 'Data Tidak Ditemukan');

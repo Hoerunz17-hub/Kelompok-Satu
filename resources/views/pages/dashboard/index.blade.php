@@ -301,7 +301,7 @@
                 }
             }); // === CHART 2: Brand Laptop yang Sering Diservice (Horizontal)
             const brandLabels = @json($brandLabels);
-            const brandCounts = @json($brandCounts);
+            const brandCounts = @json($brandCounts).map(v => Math.round(v));
             const brandColors = @json($brandColors);
 
             new Chart(document.getElementById("chartBrand"), {
@@ -319,60 +319,43 @@
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: "rgba(0,0,0,0.8)",
-                            titleFont: {
-                                size: 13,
-                                weight: "bold"
-                            },
-                            bodyFont: {
-                                size: 12
-                            },
-                            callbacks: {
-                                label: ctx => `${ctx.raw} kali diservice`
-                            }
-                        }
+                    legend: {
+                        display: false
                     },
                     scales: {
-                        x: {
-                            beginAtZero: true, // ✅ mulai dari 0
-                            min: 0,
+                        yAxes: [{
                             ticks: {
+                                beginAtZero: true,
                                 stepSize: 1,
-                                color: "#555",
-                                font: {
-                                    size: 12
+                                callback: function(value) {
+                                    // ✅ hanya tampil angka bulat
+                                    if (value % 1 === 0) {
+                                        return value;
+                                    }
                                 }
                             },
-                            grid: {
+                            gridLines: {
                                 color: "rgba(0,0,0,0.05)"
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
                             },
-                            ticks: {
-                                color: "#333",
-                                font: {
-                                    size: 13,
-                                    weight: '500'
-                                }
+                            scaleLabel: {
+                                display: true,
+
                             }
-                        }
-                    },
-                    animation: {
-                        duration: 1200,
-                        easing: "easeOutQuart"
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                color: "rgba(0,0,0,0.05)"
+                            },
+                            scaleLabel: {
+                                display: true,
+
+                            }
+                        }]
                     }
                 }
+
             });
 
         });

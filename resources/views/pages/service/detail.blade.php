@@ -10,40 +10,135 @@
 
 
         <!-- Detail Section -->
-        <div class="card mb-4">
+        <div class="card mb-4 shadow-sm border-0 rounded-4">
             <div class="card-header">
-                <h3>Detail Service</h3>
+                <h3 class="mb-0 fw-bold text-dark">Detail Service</h3>
             </div>
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-3">Invoice</dt>
-                    <dd class="col-sm-9 text-primary fw-bold">{{ $service->no_invoice }}</dd>
+            <div class="card-body py-4 px-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3 mb-3 text-secondary">Invoice</dt>
+                    <dd class="col-sm-9 mb-3 text-primary fw-bold">{{ $service->no_invoice }}</dd>
 
-                    <dt class="col-sm-3">Nama Customer</dt>
-                    <dd class="col-sm-9">{{ $service->customer->name }}</dd>
+                    <dt class="col-sm-3 mb-3 text-secondary">Nama Customer</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->customer->name }}</dd>
 
-                    <dt class="col-sm-3">Nama Tekhnisi</dt>
-                    <dd class="col-sm-9">{{ $service->technician->name }}</dd>
+                    <dt class="col-sm-3 mb-3 text-secondary">Nama Teknisi</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->technician->name }}</dd>
 
-                    <dt class="col-sm-3">Deskripsi Kerusakan</dt>
-                    <dd class="col-sm-9">{{ $service->damage_description }}</dd>
+                    <dt class="col-sm-3 mb-3 text-secondary">Deskripsi Kerusakan</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->damage_description }}</dd>
 
-                    <dt class="col-sm-3">Laptop</dt>
-                    <dd class="col-sm-9">{{ $service->laptop->model }}</dd>
+                    <dt class="col-sm-3 mb-3 text-secondary">Laptop</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->laptop->model }}</dd>
 
-                    <dt class="col-sm-3">Tanggal Selesai</dt>
-                    <dd class="col-sm-9">{{ $service->completed_date }}</dd>
+                    @php
+                        $status = $service->status ?? null;
+                        $statusColors = [
+                            'accepted' => '#ff66b2',
+                            'process' => '#ffc107',
+                            'finished' => '#28a745',
+                            'taken' => '#007bff',
+                            'cancelled' => '#dc3545',
+                        ];
+                        $color = $statusColors[$status] ?? null;
+                    @endphp
 
-                    <dt class="col-sm-3">Tanggal Kembali</dt>
-                    <dd class="col-sm-9">{{ $service->received_date }}</dd>
+                    <dt class="col-sm-3 mb-3 text-secondary">Status Service</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($color)
+                            <strong style="font-weight:700; color: {{ $color }};">
+                                {{ ucfirst($status) }}
+                            </strong>
+                        @else
+                            <strong style="font-weight:700;">
+                                {{ ucfirst($status) }}
+                            </strong>
+                        @endif
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Jenis Pembayaran</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->paymentmethod)
+                            <strong class="text-dark">{{ $service->paymentmethod }}</strong>
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Status Bayar</dt>
+                    <dd class="col-sm-9 mb-3"><strong>{{ $service->status_paid }}</strong></dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Biaya lain</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->other_cost)
+                            <strong class="fw-bold text-dark">
+                                Rp {{ number_format($service->other_cost, 0, ',', '.') }}
+                            </strong>
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Total Biaya</dt>
+                    <dd class="col-sm-9 mb-3" fw-bold text-primary">
+                        @if ($service->total_cost)
+                            <strong class="fw-bold text-dark">
+                                Rp {{ number_format($service->total_cost, 0, ',', '.') }}
+                            </strong>
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Biaya Estimasi</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->estimated_cost)
+                            <strong class="fw-bold text-dark">
+                                Rp {{ number_format($service->estimated_cost, 0, ',', '.') }}
+                            </strong>
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Bayar</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->paid)
+                            <strong class="fw-bold text-dark">
+                                Rp {{ number_format($service->paid, 0, ',', '.') }}
+                            </strong>
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+                    </dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Kembalian</dt>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->change)
+                            <strong class="fw-bold text-primary">
+                                Rp {{ number_format($service->change, 0, ',', '.') }}
+                            </strong>
+                        @else
+                            <span class="fw-bold text-primary">—</span>
+                        @endif
+                    </dd>
+
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Tanggal Selesai</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->completed_date }}</dd>
+
+                    <dt class="col-sm-3 mb-3 text-secondary">Tanggal Kembali</dt>
+                    <dd class="col-sm-9 mb-3">{{ $service->received_date }}</dd>
                 </dl>
             </div>
         </div>
 
+
         <!-- Product / Service Items -->
         <div class="card mb-4">
             <div class="card-header">
-                <h3>Product / Service Item</h3>
+                <h3 class="text-dark">Product / Service Item</h3>
             </div>
             <div class="card-body">
                 <table id="serviceTable" class="table table-bordered">
@@ -77,7 +172,7 @@
         <!-- Payment Section -->
         <div class="card mb-4">
             <div class="card-header">
-                <h3>Payment & Status</h3>
+                <h3 class="text-dark">Payment & Status</h3>
             </div>
             <div class="card-body">
                 <form action="/service/detail/{{ $service->id }}/update-payment" method="POST" id="paymentForm">
@@ -158,7 +253,8 @@
                         <select name="paymentmethod" class="form-control w-100">
                             <option value="">-- Pilih Metode Pembayaran --</option>
                             <option value="cash" {{ $service->paymentmethod == 'cash' ? 'selected' : '' }}>Cash</option>
-                            <option value="transfer" {{ $service->paymentmethod == 'transfer' ? 'selected' : '' }}>Transfer
+                            <option value="transfer" {{ $service->paymentmethod == 'transfer' ? 'selected' : '' }}>
+                                Transfer
                             </option>
                         </select>
                     </div>
