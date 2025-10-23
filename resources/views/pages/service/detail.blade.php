@@ -264,20 +264,24 @@
                     @endif
 
                     <!-- Status -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Status Service</label>
-                        <select name="status" class="form-control w-100">
-                            <option value="">-- Pilih Status --</option>
-                            <option value="accepted" {{ $service->status == 'accepted' ? 'selected' : '' }}>Accepted
-                            </option>
-                            <option value="process" {{ $service->status == 'process' ? 'selected' : '' }}>Process</option>
-                            <option value="finished" {{ $service->status == 'finished' ? 'selected' : '' }}>Finished
-                            </option>
-                            <option value="taken" {{ $service->status == 'taken' ? 'selected' : '' }}>Taken</option>
-                            <option value="cancelled" {{ $service->status == 'cancelled' ? 'selected' : '' }}>Cancelled
-                            </option>
-                        </select>
-                    </div>
+                    @if ($service->status !== 'taken')
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Status Service</label>
+                            <select name="status" class="form-control w-100">
+                                <option value="">-- Pilih Status --</option>
+                                <option value="accepted" {{ $service->status == 'accepted' ? 'selected' : '' }}>Accepted
+                                </option>
+                                <option value="process" {{ $service->status == 'process' ? 'selected' : '' }}>Process
+                                </option>
+                                <option value="finished" {{ $service->status == 'finished' ? 'selected' : '' }}>Finished
+                                </option>
+                                <option value="taken" {{ $service->status == 'taken' ? 'selected' : '' }}>Taken</option>
+                                <option value="cancelled" {{ $service->status == 'cancelled' ? 'selected' : '' }}>
+                                    Cancelled</option>
+                            </select>
+                        </div>
+                    @endif
+
                     {{-- ✅ Tambahkan alert di bawah ini --}}
                     @if ($service->status_paid === 'paid')
                         <div class="alert alert-success mt-3 mb-0">
