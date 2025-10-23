@@ -38,10 +38,7 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="damage_description">Deskripsi Kerusakan</label>
-                                    <textarea class="form-control" name="damage_description" id="damage_description" rows="3"></textarea>
-                                </div>
+
                             </div>
 
                             <div class="col-md-4">
@@ -54,11 +51,11 @@
                                         @endforeach
                                     </select>
                                 </div>
-
                                 <div class="form-group">
-                                    <label for="received_date">Tanggal Kembali</label>
-                                    <input type="date" class="form-control" name="received_date" id="received_date">
+                                    <label for="damage_description">Deskripsi Kerusakan</label>
+                                    <textarea class="form-control" name="damage_description" id="damage_description" rows="3"></textarea>
                                 </div>
+
 
                             </div>
 
@@ -75,10 +72,7 @@
 
 
 
-                                <div class="form-group">
-                                    <label for="completed_date">Tanggal Selesai</label>
-                                    <input type="date" class="form-control" name="completed_date" id="completed_date">
-                                </div>
+
                             </div>
                         </div>
 

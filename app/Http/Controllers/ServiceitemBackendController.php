@@ -21,21 +21,32 @@ class ServiceitemBackendController extends Controller
     }
 
     // Simpan service item baru
-    public function store(Request $request)
-    {
-        $request->validate([
-            'service_name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'service_name' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+    ]);
 
-        Serviceitem::create([
-            'service_name' => $request->service_name,
-            'price' => $request->price,
-            'is_active' => 'active',
-        ]);
+    // 🔍 Cek apakah nama service sudah ada
+    $exists = Serviceitem::where('service_name', $request->service_name)->exists();
 
-        return redirect('/serviceitem')->with('success', 'Service Item berhasil ditambahkan');
+    if ($exists) {
+        // kirim session error ke blade
+        return redirect()->back()
+            ->withInput()
+            ->with('duplicate_error', 'Nama service ini sudah ada di database.');
     }
+
+    Serviceitem::create([
+        'service_name' => $request->service_name,
+        'price' => $request->price,
+        'is_active' => 'active',
+    ]);
+
+    return redirect('/serviceitem')->with('success', 'Service Item berhasil ditambahkan');
+}
+
 
     // Form edit service item
     public function edit($id)

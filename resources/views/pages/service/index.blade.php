@@ -152,6 +152,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
     @if (session('success'))
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -167,6 +168,7 @@
             });
         </script>
     @endif
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
