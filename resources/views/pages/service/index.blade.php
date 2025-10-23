@@ -157,17 +157,32 @@
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: '{{ session('success') }}',
+                    icon: '{{ Str::startsWith(session('success'), 'ℹ️') ? 'info' : 'success' }}',
+                    title: '{{ Str::startsWith(session('success'), 'ℹ️') ? 'Info' : 'Berhasil!' }}',
+                    html: `{!! nl2br(e(session('success'))) !!}`,
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 2500,
                     toast: true,
                     position: 'top-end'
                 });
             });
         </script>
     @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#d33'
+                });
+            });
+        </script>
+    @endif
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
