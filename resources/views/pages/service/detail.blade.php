@@ -264,7 +264,7 @@
                     @endif
 
                     <!-- Status -->
-                    @if ($service->status !== 'taken')
+                    @if (!in_array($service->status, ['taken', 'cancelled']))
                         <div class="mb-4">
                             <label class="form-label fw-bold">Status Service</label>
                             <select name="status" class="form-control w-100">
@@ -289,11 +289,6 @@
                         </div>
                     @endif
 
-                    @if ($service->change > 0)
-                        <div class="alert alert-info mt-2 mb-0">
-                            💰 Kembalian: <strong>Rp {{ number_format($service->change, 0, ',', '.') }}</strong>
-                        </div>
-                    @endif
                     {{-- Payment section muncul hanya kalau belum lunas --}}
                     @if ($service->status_paid !== 'paid')
                         <!-- Payment Method -->
