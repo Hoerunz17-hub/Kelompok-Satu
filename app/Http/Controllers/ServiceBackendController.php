@@ -113,25 +113,29 @@ class ServiceBackendController extends Controller
 {
     $service = Services::findOrFail($id);
 
-    // Bersihin format angka
     $clean = fn($val) => (float) str_replace(['.', ','], ['', '.'], preg_replace('/[^\d.,]/', '', $val ?? '0'));
-
     $totalPrice = $service->details->sum('price');
 
-    // ambil nilai lama
-    $paidBefore = $service->paid ?? 0;
-    $oldOther = $service->other_cost ?? 0;
-    $oldChange = $service->change ?? 0;
+    // === Simpan nilai lama ===
+    $old = [
+        'status' => $service->status,
+        'completed_date' => $service->completed_date,
+        'received_date' => $service->received_date,
+        'paid' => $service->paid ?? 0,
+        'paymentmethod' => $service->paymentmethod,
+        'other_cost' => $service->other_cost ?? 0,
+        'status_paid' => $service->status_paid,
+        'change' => $service->change ?? 0,
+    ];
 
-    // kalau tidak ada input paid/other_cost, pakai nilai lama
-    $otherCost = $request->filled('other_cost') ? $clean($request->other_cost) : $oldOther;
+    // === Ambil nilai baru ===
+    $otherCost = $request->filled('other_cost') ? $clean($request->other_cost) : $old['other_cost'];
     $paidNow   = $request->filled('paid') ? $clean($request->paid) : 0;
-
-    $newPaid = $paidBefore + $paidNow;
+    $newPaid   = $old['paid'] + $paidNow;
     $grandTotal = $totalPrice + $otherCost;
     $change = max(0, $newPaid - $grandTotal);
 
-    // status paid otomatis
+    // === Status Paid Otomatis ===
     if ($newPaid <= 0) {
         $statusPaid = 'unpaid';
     } elseif ($newPaid < $grandTotal) {
@@ -140,14 +144,15 @@ class ServiceBackendController extends Controller
         $statusPaid = 'paid';
     }
 
-    // 🔒 kalau tidak ada perubahan pembayaran, jangan ubah nilai lama
+    // === Kalau tidak ubah pembayaran ===
     if (!$request->filled('paid') && !$request->filled('other_cost')) {
-        $newPaid = $paidBefore;
-        $otherCost = $oldOther;
-        $change = $oldChange;
-        $statusPaid = $service->status_paid;
+        $newPaid = $old['paid'];
+        $otherCost = $old['other_cost'];
+        $change = $old['change'];
+        $statusPaid = $old['status_paid'];
     }
 
+    // === Update data ===
     $service->update([
         'status' => $request->status ?? $service->status,
         'paymentmethod' => $request->paymentmethod ?? $service->paymentmethod,
@@ -160,14 +165,41 @@ class ServiceBackendController extends Controller
         'completed_date' => $request->completed_date ?? $service->completed_date,
     ]);
 
-    // Notifikasi
-    $message = 'Data berhasil diperbarui!';
-    if ($change > 0) {
+    // === Deteksi perubahan satu per satu ===
+    $changes = [];
+
+    if ($old['status'] !== $service->status) {
+        $changes[] = 'Status service';
+    }
+    if ($old['completed_date'] !== $service->completed_date || $old['received_date'] !== $service->received_date) {
+        $changes[] = 'Tanggal';
+    }
+    if (
+        $old['paid'] !== $service->paid ||
+        $old['paymentmethod'] !== $service->paymentmethod ||
+        $old['other_cost'] !== $service->other_cost ||
+        $old['status_paid'] !== $service->status_paid
+    ) {
+        $changes[] = 'Pembayaran';
+    }
+
+        // === Buat pesan ===
+    if (empty($changes)) {
+        $message = 'ℹ️ Tidak ada perubahan data.';
+    } else {
+        $message = '✅ ' . implode(', ', $changes) . ' berhasil diperbarui!';
+    }
+
+    // Tambahkan kembalian hanya jika pembayaran berubah DAN ada change baru
+    if (in_array('Pembayaran', $changes) && $change > 0) {
         $message .= ' 💰 Kembalian: Rp ' . number_format($change, 0, ',', '.');
     }
 
     return redirect('/service')->with('success', $message);
-}
+
+    }
+
+
 
 
     public function destroy($id)
