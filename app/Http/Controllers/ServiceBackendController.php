@@ -73,8 +73,7 @@ class ServiceBackendController extends Controller
     'total_cost' => $total_cost,
     'status' => $request->status ?: 'Accepted', // ✅ default Accepted kalau kosong
             'status_paid' => 'Unpaid', // ✅ default Unpaid saat create
-    'received_date' => $request->received_date,
-    'completed_date' => $request->completed_date,
+
 ]);
 
 
@@ -110,45 +109,64 @@ class ServiceBackendController extends Controller
             return view('pages.service.detail', compact('service'));
         }
 
-   public function updatePayment(Request $request, $id)
+ public function updatePayment(Request $request, $id)
 {
     $service = Services::findOrFail($id);
 
-    // Fungsi untuk membersihkan angka dari format rupiah
+    // Bersihin format angka
     $clean = fn($val) => (float) str_replace(['.', ','], ['', '.'], preg_replace('/[^\d.,]/', '', $val ?? '0'));
 
     $totalPrice = $service->details->sum('price');
-    $otherCost = $clean($request->other_cost);
-    $paidNow = $clean($request->paid); // jumlah yang baru diinput user
-    $paidBefore = $service->paid ?? 0; // total yang sudah pernah dibayar
-    $newPaid = $paidBefore + $paidNow; // total keseluruhan pembayaran setelah ditambah
 
+    // ambil nilai lama
+    $paidBefore = $service->paid ?? 0;
+    $oldOther = $service->other_cost ?? 0;
+    $oldChange = $service->change ?? 0;
+
+    // kalau tidak ada input paid/other_cost, pakai nilai lama
+    $otherCost = $request->filled('other_cost') ? $clean($request->other_cost) : $oldOther;
+    $paidNow   = $request->filled('paid') ? $clean($request->paid) : 0;
+
+    $newPaid = $paidBefore + $paidNow;
     $grandTotal = $totalPrice + $otherCost;
-
-    // Hitung kembalian (jika bayar lebih)
     $change = max(0, $newPaid - $grandTotal);
 
-    // Tentukan status pembayaran otomatis
+    // status paid otomatis
     if ($newPaid <= 0) {
-        $statusPaid = 'unpaid'; // Belum bayar sama sekali
+        $statusPaid = 'unpaid';
     } elseif ($newPaid < $grandTotal) {
-        $statusPaid = 'debt'; // Belum lunas
+        $statusPaid = 'debt';
     } else {
-        $statusPaid = 'paid'; // Sudah lunas
+        $statusPaid = 'paid';
     }
 
-    // Update data service
+    // 🔒 kalau tidak ada perubahan pembayaran, jangan ubah nilai lama
+    if (!$request->filled('paid') && !$request->filled('other_cost')) {
+        $newPaid = $paidBefore;
+        $otherCost = $oldOther;
+        $change = $oldChange;
+        $statusPaid = $service->status_paid;
+    }
+
     $service->update([
-        'status' => $request->status,
-        'paymentmethod' => $request->paymentmethod,
+        'status' => $request->status ?? $service->status,
+        'paymentmethod' => $request->paymentmethod ?? $service->paymentmethod,
         'other_cost' => $otherCost,
-        'paid' => $newPaid, // total keseluruhan setelah ditambah
+        'paid' => $newPaid,
         'change' => $change,
         'estimated_cost' => $grandTotal,
         'status_paid' => $statusPaid,
+        'received_date' => $request->received_date ?? $service->received_date,
+        'completed_date' => $request->completed_date ?? $service->completed_date,
     ]);
 
-    return redirect('/service')->with('success', 'Pembayaran berhasil diperbarui! Kembalian: Rp ' . number_format($change, 0, ',', '.'));
+    // Notifikasi
+    $message = 'Data berhasil diperbarui!';
+    if ($change > 0) {
+        $message .= ' 💰 Kembalian: Rp ' . number_format($change, 0, ',', '.');
+    }
+
+    return redirect('/service')->with('success', $message);
 }
 
 

@@ -23,29 +23,43 @@ class LaptopBackendController extends Controller
 
     // Simpan data laptop baru
     public function store(Request $request)
-    {
-        $request->validate([
-             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'release_year' => 'nullable|digits:4|integer|min:1970|max:' . (date('Y') + 1),
-        ]);
+{
+    $request->validate([
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
+        'brand' => 'required|string|max:255',
+        'model' => 'required|string|max:255',
+        'release_year' => 'nullable|digits:4|integer|min:1970|max:' . (date('Y') + 1),
+    ]);
 
-        $data = [
-            'brand' => $request->brand,
-            'model' => $request->model,
-            'release_year' => $request->release_year,
-            'is_active' => 'active',
-        ];
+    // Cek apakah kombinasi brand + model + release_year sudah ada
+    $exists = Laptop::where('brand', $request->brand)
+        ->where('model', $request->model)
+        ->where('release_year', $request->release_year)
+        ->exists();
 
-        if ($request->hasFile('foto')) {
-            $data['image'] = $request->file('foto')->store('laptops', 'public');
-        }
-
-        Laptop::create($data);
-
-        return redirect('/laptop')->with('success', 'Laptop berhasil ditambahkan');
+    if ($exists) {
+        // Kirimkan session error untuk ditangkap di Blade
+        return redirect()->back()
+            ->withInput()
+            ->with('duplicate_error', 'Laptop dengan brand, model, dan tahun rilis yang sama sudah ada.');
     }
+
+    $data = [
+        'brand' => $request->brand,
+        'model' => $request->model,
+        'release_year' => $request->release_year,
+        'is_active' => 'active',
+    ];
+
+    if ($request->hasFile('foto')) {
+        $data['image'] = $request->file('foto')->store('laptops', 'public');
+    }
+
+    Laptop::create($data);
+
+    return redirect('/laptop')->with('success', 'Laptop berhasil ditambahkan');
+}
+
 
     // Tampilkan form edit laptop
     public function edit($id)

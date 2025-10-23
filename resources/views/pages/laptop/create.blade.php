@@ -84,8 +84,34 @@
             background-color: #f8f9fa;
         }
     </style>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        @if (session('duplicate_error'))
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Duplikat',
+                text: '{{ session('duplicate_error') }}',
+                confirmButtonColor: '#A461D8'
+            });
+        @endif
+
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#A461D8'
+            });
+        @endif
+
+        @if ($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                html: `{!! implode('<br>', $errors->all()) !!}`,
+                confirmButtonColor: '#A461D8'
+            });
+        @endif
         function previewImage(event) {
             const input = event.target;
             const preview = document.getElementById('preview');

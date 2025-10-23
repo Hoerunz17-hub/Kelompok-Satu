@@ -3,12 +3,19 @@
         <li class="nav-item nav-category">Navigation</li>
         <li class="nav-item {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('/') }}">
-                <span class="icon-bg"><i class="mdi mdi-cube menu-icon"></i></span>
+                <span class="icon-bg"><i class="mdi mdi-home
+ menu-icon"></i></span>
                 <span class="menu-title">Dashboard</span>
             </a>
         </li>
+        <li class="nav-item {{ request()->is('service') || request()->is('service/*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ url('/service') }}">
+                <span class="icon-bg"><i class="mdi mdi-wrench menu-icon"></i></span>
+                <span class="menu-title">Service</span>
+            </a>
+        </li>
 
-        <li class="nav-item nav-category">Main Data</li>
+        <li class="nav-item nav-category">Master Data</li>
 
         <li class="nav-item {{ request()->is('user*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('/user') }}">
@@ -23,13 +30,6 @@
             <a class="nav-link" href="{{ url('/laptop') }}">
                 <span class="icon-bg"><i class="mdi mdi-laptop menu-icon"></i></span>
                 <span class="menu-title">Laptop</span>
-            </a>
-        </li>
-
-        <li class="nav-item {{ request()->is('service') || request()->is('service/*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('/service') }}">
-                <span class="icon-bg"><i class="mdi mdi-wrench menu-icon"></i></span>
-                <span class="menu-title">Service</span>
             </a>
         </li>
 

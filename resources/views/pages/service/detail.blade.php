@@ -126,10 +126,24 @@
 
 
                     <dt class="col-sm-3 mb-3 text-secondary">Tanggal Selesai</dt>
-                    <dd class="col-sm-9 mb-3">{{ $service->completed_date }}</dd>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->completed_date)
+                            {{ $service->completed_date }}
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+
+                    </dd>
 
                     <dt class="col-sm-3 mb-3 text-secondary">Tanggal Kembali</dt>
-                    <dd class="col-sm-9 mb-3">{{ $service->received_date }}</dd>
+                    <dd class="col-sm-9 mb-3">
+                        @if ($service->received_date)
+                            {{ $service->received_date }}
+                        @else
+                            <span class="fw-bold text-dark">—</span>
+                        @endif
+
+                    </dd>
                 </dl>
             </div>
         </div>
@@ -175,7 +189,9 @@
                 <h3 class="text-dark">Payment & Status</h3>
             </div>
             <div class="card-body">
+
                 <form action="/service/detail/{{ $service->id }}/update-payment" method="POST" id="paymentForm">
+
                     @csrf
                     @method('PATCH')
 
@@ -188,9 +204,6 @@
                         $estimated = $totalPrice;
                         $remaining = $subtotal - $paid;
                     @endphp
-
-
-
 
                     <!-- Info Summary -->
                     <div class="row mb-4 payment-summary">
@@ -208,7 +221,6 @@
                                 <span>Total Paid</span>
                                 <span><strong id="total_paid">Rp {{ number_format($paid, 0, ',', '.') }}</strong></span>
                             </div>
-
                         </div>
 
                         <div class="col-md-6">
@@ -216,6 +228,11 @@
                                 <span>Estimated Cost</span>
                                 <span><strong id="estimated_cost">Rp
                                         {{ number_format($estimated, 0, ',', '.') }}</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Other Cost</span>
+                                <span><strong id="display_other_cost">Rp
+                                        {{ number_format($otherCost, 0, ',', '.') }}</strong></span>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span>Subtotal</span>
@@ -231,6 +248,21 @@
 
                     <hr>
 
+                    {{-- Tanggal kembali & selesai (hilang kalau sudah ada) --}}
+                    @if (!$service->received_date)
+                        <div class="form-group">
+                            <label for="received_date">Tanggal Kembali</label>
+                            <input type="date" class="form-control" name="received_date" id="received_date">
+                        </div>
+                    @endif
+
+                    @if (!$service->completed_date)
+                        <div class="form-group">
+                            <label for="completed_date">Tanggal Selesai</label>
+                            <input type="date" class="form-control" name="completed_date" id="completed_date">
+                        </div>
+                    @endif
+
                     <!-- Status -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Status Service</label>
@@ -239,56 +271,74 @@
                             <option value="accepted" {{ $service->status == 'accepted' ? 'selected' : '' }}>Accepted
                             </option>
                             <option value="process" {{ $service->status == 'process' ? 'selected' : '' }}>Process</option>
-                            <option value="taken" {{ $service->status == 'taken' ? 'selected' : '' }}>Taken</option>
                             <option value="finished" {{ $service->status == 'finished' ? 'selected' : '' }}>Finished
                             </option>
+                            <option value="taken" {{ $service->status == 'taken' ? 'selected' : '' }}>Taken</option>
                             <option value="cancelled" {{ $service->status == 'cancelled' ? 'selected' : '' }}>Cancelled
                             </option>
                         </select>
                     </div>
+                    {{-- ✅ Tambahkan alert di bawah ini --}}
+                    @if ($service->status_paid === 'paid')
+                        <div class="alert alert-success mt-3 mb-0">
+                            <strong>✅ 'Semua biaya sudah dilunasi. Terima kasih 😊'</strong>
+                        </div>
+                    @endif
 
-                    <!-- Payment Method -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Payment Method</label>
-                        <select name="paymentmethod" class="form-control w-100">
-                            <option value="">-- Pilih Metode Pembayaran --</option>
-                            <option value="cash" {{ $service->paymentmethod == 'cash' ? 'selected' : '' }}>Cash</option>
-                            <option value="transfer" {{ $service->paymentmethod == 'transfer' ? 'selected' : '' }}>
-                                Transfer
-                            </option>
-                        </select>
-                    </div>
+                    @if ($service->change > 0)
+                        <div class="alert alert-info mt-2 mb-0">
+                            💰 Kembalian: <strong>Rp {{ number_format($service->change, 0, ',', '.') }}</strong>
+                        </div>
+                    @endif
+                    {{-- Payment section muncul hanya kalau belum lunas --}}
+                    @if ($service->status_paid !== 'paid')
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Payment Method</label>
+                            <select name="paymentmethod" class="form-control w-100">
+                                <option value="">-- Pilih Metode Pembayaran --</option>
+                                <option value="cash" {{ $service->paymentmethod == 'cash' ? 'selected' : '' }}>Cash
+                                </option>
+                                <option value="transfer" {{ $service->paymentmethod == 'transfer' ? 'selected' : '' }}>
+                                    Transfer</option>
+                            </select>
+                        </div>
 
-                    <!-- Other Cost -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Other Cost</label>
-                        <input type="text" name="other_cost" id="other_cost" class="form-control w-100 text-end"
-                            value="{{ number_format($otherCost, 0, ',', '.') }}">
-                    </div>
+                        <!-- Other Cost -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Other Cost</label>
+                            <input type="text" name="other_cost" id="other_cost" class="form-control w-100 text-end"
+                                value="{{ number_format($otherCost, 0, ',', '.') }}">
+                        </div>
 
-                    <!-- Paid -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Paid</label>
-                        <input type="text" name="paid" id="paid" class="form-control w-100 text-end"
-                            placeholder="Masukkan jumlah dibayar">
-                    </div>
-
-
-                    <!-- Remaining -->
-                    <p class="mt-2 fs-5 fw-bold text-dark">
-                        Remaining payment:
-                        <span id="remaining_payment" style="color:#007bff; font-weight:600;">
-                            {{ $remaining > 0 ? 'Rp ' . number_format($remaining, 0, ',', '.') : 'Rp 0' }}
-                        </span>
-                    </p>
+                        <!-- Paid -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Paid</label>
+                            <input type="text" name="paid" id="paid" class="form-control w-100 text-end"
+                                placeholder="Masukkan jumlah dibayar">
+                        </div>
 
 
+                        <!-- Remaining -->
+                        <p class="mt-2 fs-5 fw-bold text-dark">
+                            Remaining payment:
+                            <span id="remaining_payment" style="color:#007bff; font-weight:600;">
+                                {{ $remaining > 0 ? 'Rp ' . number_format($remaining, 0, ',', '.') : 'Rp 0' }}
+                            </span>
+                        </p>
+                    @endif
+
+                    <!-- Tombol Update -->
                     <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn btn-primary px-4">Update Payment</button>
+                        <button type="submit" class="btn btn-primary px-4"
+                            {{ in_array($service->status, ['taken', 'cancelled']) ? 'disabled' : '' }}>
+                            Update Payment
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
 
 
     </div>
@@ -331,8 +381,8 @@
         const totalPrice = {{ $totalPrice }};
         const paidBefore = {{ $paidBefore }};
         const otherInput = document.getElementById('other_cost');
+        const displayOtherText = document.getElementById('display_other_cost');
         const paidInput = document.getElementById('paid');
-
         const estimatedText = document.getElementById('estimated_cost');
         const subtotalText = document.getElementById('subtotal');
         const changeText = document.getElementById('change');
@@ -348,15 +398,14 @@
             const remaining = subtotal - totalPaid;
 
             estimatedText.innerText = formatRupiah(totalPrice);
+            displayOtherText.innerText = formatRupiah(other);
             subtotalText.innerText = formatRupiah(subtotal);
             totalPaidText.innerText = formatRupiah(totalPaid);
 
-            // tampilkan remaining payment (kalau sudah lunas, jadi Rp 0)
             remainingText.innerText = formatRupiah(remaining > 0 ? remaining : 0);
-
-            // tampilkan total change (kalau ada kembalian)
             changeText.innerText = change > 0 ? formatRupiah(change) : 'Rp 0';
         }
+
 
         function formatLiveInput(input) {
             input.addEventListener('input', function() {
