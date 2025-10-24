@@ -19,6 +19,7 @@ return new class extends Migration
             $table->year('release_year')->nullable();
             $table->enum('is_active', ['active', 'nonactive'])->default('active');
             $table->timestamps();
+             $table->softDeletes(); // 🟢 tambahkan ini
         });
     }
 

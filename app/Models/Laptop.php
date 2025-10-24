@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Laptop extends Model
 {
+     use SoftDeletes;
+
         //nama table
     protected $table = 'laptops';
 
@@ -15,4 +18,5 @@ class Laptop extends Model
     {
         return $this->hasMany(Services::class, 'laptop_id');
     }
+     protected $dates = ['deleted_at'];
 }
