@@ -15,7 +15,7 @@
                         <h4 class="card-title mb-3 mb-md-0 text-dark fw-bold">Data User</h4>
 
                         <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center" style="gap: 20px; margin-right: 50px;">
+                            <div class="d-flex align-items-center" style="gap: 30px; margin-right: 40px;">
                                 <input type="text" id="searchInput" class="form-control" placeholder="Cari user..."
                                     style="width:250px; border-radius:8px; font-size:14px;">
 
