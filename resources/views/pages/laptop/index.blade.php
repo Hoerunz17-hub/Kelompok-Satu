@@ -70,10 +70,12 @@
                                             style="background-color:#ffc107; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block;">
                                             Edit
                                         </a>
-                                        <a href="/laptop/delete/{{ $laptop->id }}" class="btn"
+                                        <a href="javascript:void(0);"
+                                            onclick="confirmDelete('/laptop/delete/{{ $laptop->id }}')" class="btn"
                                             style="background-color:#ff4d4d; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block; margin-left:4px;">
                                             Delete
                                         </a>
+
                                     </td>
 
 
@@ -195,6 +197,22 @@
         </script>
     @endif
     <script>
+        function confirmDelete(url) {
+            Swal.fire({
+                title: 'Yakin mau hapus?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
         document.addEventListener("DOMContentLoaded", function() {
 
             // === TOGGLE STATUS ===

@@ -35,10 +35,6 @@
                         </div>
                     </div>
 
-
-
-
-
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -96,8 +92,12 @@
                                             style="background-color:#0069ff; border:none; color:white; padding:8px 16px; border-radius:8px;">Detail</a>
                                         <a href="/user/edit/{{ $user->id }}" class="btn"
                                             style="background-color:#ffc107; border:none; color:white; padding:8px 16px; border-radius:8px;">Edit</a>
-                                        <a href="/user/delete/{{ $user->id }}" class="btn"
-                                            style="background-color:#ff4d4d; border:none; color:white; padding:8px 16px; border-radius:8px;">Delete</a>
+                                        <a href="javascript:void(0);" onclick="confirmDelete({{ $user->id }})"
+                                            class="btn"
+                                            style="background-color:#ff4d4d; border:none; color:white; padding:8px 16px; border-radius:8px;">
+                                            Delete
+                                        </a>
+
                                     </td>
                                 </tr>
                             @endforeach
@@ -198,6 +198,22 @@
     @endif
 
     <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Yakin mau hapus?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/user/delete/' + id;
+                }
+            });
+        }
         document.addEventListener("DOMContentLoaded", function() {
             // === TOGGLE STATUS ===
             document.querySelectorAll(".toggle-status").forEach(toggle => {
