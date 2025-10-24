@@ -189,7 +189,7 @@
 
             // Ambil semua row
             const rows = Array.from(document.querySelectorAll("table.table tbody tr"));
-            const rowsPerPage = 3; // tampilkan 3 data per halaman
+            const rowsPerPage = 10; // tampilkan 3 data per halaman
             let currentPage = 1;
             let filteredRows = [...rows]; // untuk search + pagination
 

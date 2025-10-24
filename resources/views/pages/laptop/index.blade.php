@@ -224,7 +224,7 @@
             // === SEARCH + PAGINATION ===
             const searchInput = document.getElementById("searchInput");
             const rows = Array.from(document.querySelectorAll("table.table tbody tr"));
-            const rowsPerPage = 3;
+            const rowsPerPage = 10;
             let currentPage = 1;
             let filteredRows = [...rows]; // data awal
 

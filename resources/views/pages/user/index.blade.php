@@ -11,16 +11,33 @@
                 <div class="card-body">
 
                     <!-- Judul + Tombol Tambah -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="card-title mb-0">Data User</h4>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Cari user..."
-                            style="width:250px; border-radius:8px; font-size:14px; margin-left:8px;">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-3 mb-md-0 text-dark fw-bold">Data User</h4>
 
-                        <a href="/user/create" class="btn btn-success"
-                            style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">
-                            + Tambah
-                        </a>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center" style="gap: 20px; margin-right: 50px;">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Cari user..."
+                                    style="width:250px; border-radius:8px; font-size:14px;">
+
+                                <select id="roleFilter" class="form-select"
+                                    style="width:220px; border-radius:8px; font-size:14px;">
+                                    <option value="">Semua Role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="customer">Customer</option>
+                                    <option value="technician">Technician</option>
+                                </select>
+                            </div>
+
+                            <a href="/user/create" class="btn btn-success"
+                                style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">
+                                + Tambah
+                            </a>
+                        </div>
                     </div>
+
+
+
+
 
                     <table class="table table-hover">
                         <thead>
@@ -207,7 +224,7 @@
             // === SEARCH + PAGINATION ===
             const searchInput = document.getElementById("searchInput");
             const rows = Array.from(document.querySelectorAll("table.table tbody tr"));
-            const rowsPerPage = 3;
+            const rowsPerPage = 10;
             let currentPage = 1;
             let filteredRows = [...rows];
 
@@ -259,14 +276,27 @@
                 renderTable();
             });
 
-            searchInput.addEventListener("input", function() {
-                const keyword = this.value.toLowerCase().trim();
-                filteredRows = keyword ? rows.filter(r => r.textContent.toLowerCase().includes(keyword)) : [
-                    ...rows
-                ];
+            const roleFilter = document.getElementById("roleFilter");
+
+            function applyFilters() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                const selectedRole = roleFilter.value.toLowerCase();
+
+                filteredRows = rows.filter(row => {
+                    const textMatch = row.textContent.toLowerCase().includes(keyword);
+                    const roleCell = row.querySelector("td:nth-child(5)");
+                    const roleText = roleCell ? roleCell.textContent.toLowerCase().trim() : "";
+                    const roleMatch = selectedRole ? roleText === selectedRole : true;
+                    return textMatch && roleMatch;
+                });
+
                 currentPage = 1;
                 renderTable();
-            });
+            }
+
+            searchInput.addEventListener("input", applyFilters);
+            roleFilter.addEventListener("change", applyFilters);
+
 
             renderTable();
         });
