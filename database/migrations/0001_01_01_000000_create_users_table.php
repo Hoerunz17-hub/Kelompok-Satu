@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('is_active', ['active', 'nonactive'])->default('active');
              $table->rememberToken();
             $table->timestamps();
+             $table->softDeletes(); // 🟢 tambahkan ini
         });
     }
 

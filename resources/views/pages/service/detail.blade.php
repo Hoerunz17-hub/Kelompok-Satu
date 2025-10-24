@@ -20,16 +20,16 @@
                     <dd class="col-sm-9 mb-3 text-primary fw-bold">{{ $service->no_invoice }}</dd>
 
                     <dt class="col-sm-3 mb-3 text-secondary">Nama Customer</dt>
-                    <dd class="col-sm-9 mb-3">{{ $service->customer->name }}</dd>
+                    <dd class="col-sm-9 mb-3">{{ optional($service->customer)->name ?? '-' }}</dd>
 
                     <dt class="col-sm-3 mb-3 text-secondary">Nama Teknisi</dt>
-                    <dd class="col-sm-9 mb-3">{{ $service->technician->name }}</dd>
+                    <dd class="col-sm-9 mb-3">{{ optional($service->technician)->name ?? '-' }}</dd>
 
                     <dt class="col-sm-3 mb-3 text-secondary">Deskripsi Kerusakan</dt>
                     <dd class="col-sm-9 mb-3">{{ $service->damage_description }}</dd>
 
                     <dt class="col-sm-3 mb-3 text-secondary">Laptop</dt>
-                    <dd class="col-sm-9 mb-3">{{ $service->laptop->model }}</dd>
+                    <dd class="col-sm-9 mb-3">{{ optional($service->laptop)->model ?? '-' }}</dd>
 
                     @php
                         $status = $service->status ?? null;
@@ -168,7 +168,7 @@
                         @forelse ($service->details as $detail)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $detail->serviceItem->service_name }}</td>
+                                <td>{{ optional($detail->serviceitem)->service_name ?? '-' }}</td>
                                 <td>Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($detail->price, 0, ',', '.') }}</td>
                             </tr>

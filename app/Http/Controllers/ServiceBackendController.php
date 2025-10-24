@@ -202,15 +202,39 @@ class ServiceBackendController extends Controller
 
 
 
-    public function destroy($id)
-    {
-        $service = Services::find($id);
+   public function destroy($id)
+{
+    $service = Services::find($id);
 
-        if ($service) {
-            $service->delete();
-            return redirect('/service')->with('success', 'Service berhasil dihapus!');
-        }
-
-        return redirect('/service')->with('error', 'Service tidak ditemukan!');
+    if ($service) {
+        $service->delete(); // ini soft delete, bukan hapus permanen
+        return redirect('/service')->with('success', 'Service berhasil dihapus (soft delete)!');
     }
+
+    return redirect('/service')->with('error', 'Service tidak ditemukan!');
+}
+public function restore($id)
+{
+    $service = Services::withTrashed()->find($id);
+
+    if ($service) {
+        $service->restore();
+        return redirect('/service')->with('success', 'Service berhasil direstore!');
+    }
+
+    return redirect('/service')->with('error', 'Service tidak ditemukan!');
+}
+
+public function forceDelete($id)
+{
+    $service = Services::withTrashed()->find($id);
+
+    if ($service) {
+        $service->forceDelete();
+        return redirect('/service')->with('success', 'Service dihapus permanen!');
+    }
+
+    return redirect('/service')->with('error', 'Service tidak ditemukan!');
+}
+
 }

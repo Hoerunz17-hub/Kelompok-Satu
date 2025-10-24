@@ -83,17 +83,30 @@ class ServiceitemBackendController extends Controller
     }
 
     // Hapus service item
-    public function destroy($id)
-    {
-        $serviceitem = Serviceitem::find($id);
+    // Hapus service item (soft delete)
+public function destroy($id)
+{
+    $serviceitem = Serviceitem::find($id);
 
-        if ($serviceitem) {
-            $serviceitem->delete();
-            return redirect('/serviceitem')->with('success', 'Service Item berhasil dihapus');
-        }
-
-        return redirect('/serviceitem')->with('error', 'Service Item tidak ditemukan');
+    if ($serviceitem) {
+        $serviceitem->delete(); // ini soft delete, bukan hard delete
+        return redirect('/serviceitem')->with('success', 'Service Item berhasil dihapus (soft delete)');
     }
+
+    return redirect('/serviceitem')->with('error', 'Service Item tidak ditemukan');
+}
+public function restore($id)
+{
+    $serviceitem = Serviceitem::withTrashed()->find($id);
+
+    if ($serviceitem && $serviceitem->trashed()) {
+        $serviceitem->restore();
+        return redirect('/serviceitem')->with('success', 'Service Item berhasil direstore!');
+    }
+
+    return redirect('/serviceitem')->with('error', 'Data tidak ditemukan atau belum dihapus.');
+}
+
 
     // Toggle status aktif/nonaktif
     public function toggle(Request $request, $id)

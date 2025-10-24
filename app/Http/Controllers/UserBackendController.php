@@ -11,7 +11,8 @@ class UserBackendController extends Controller
 {
    public function index()
     {
-        $users = Usertiga::all();
+        // Ambil semua user, termasuk yang sudah di-soft delete
+    $users = Usertiga::all();
         return view('pages.user.index', compact('users'));
     }
 
@@ -105,16 +106,48 @@ class UserBackendController extends Controller
     {
         $user = Usertiga::find($id);
 
-        if ($user) {
-            if ($user->image) {
-                Storage::disk('public')->delete($user->image);
-            }
-            $user->delete();
-            return redirect('/user')->with('success', 'Users Berhasil Dihapus');
+        if (!$user) {
+            return redirect('/user')->with('error', 'Data Tidak Ditemukan');
         }
 
-        return redirect('/user')->with('error', 'Data Tidak Ditemukan');
+        // Soft delete tanpa hapus file dulu
+        $user->delete();
+
+        return redirect('/user')->with('success', 'User berhasil dihapus sementara');
     }
+
+    public function restore($id)
+{
+    $user = Usertiga::onlyTrashed()->find($id);
+
+    if (!$user) {
+        return redirect('/user')->with('error', 'Data tidak ditemukan atau belum dihapus');
+    }
+
+    $user->restore();
+
+    return redirect('/user')->with('success', 'User berhasil dikembalikan');
+}
+
+public function forceDelete($id)
+{
+    $user = Usertiga::onlyTrashed()->find($id);
+
+    if (!$user) {
+        return redirect('/user')->with('error', 'Data tidak ditemukan');
+    }
+
+    // Baru hapus file kalau benar-benar dihapus permanen
+    if ($user->image) {
+        Storage::disk('public')->delete($user->image);
+    }
+
+    $user->forceDelete();
+
+    return redirect('/user')->with('success', 'User berhasil dihapus permanen');
+}
+
+
     public function show($id)
 {
   $user = Usertiga::with(['customerServices.laptop', 'technicianServices.laptop'])->find($id);

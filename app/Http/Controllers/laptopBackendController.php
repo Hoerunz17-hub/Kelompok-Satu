@@ -11,6 +11,7 @@ class LaptopBackendController extends Controller
     // Tampilkan semua data laptop
     public function index()
     {
+
         $laptops = Laptop::all();
         return view('pages.laptop.index', compact('laptops'));
     }
@@ -108,20 +109,29 @@ class LaptopBackendController extends Controller
     }
 
     // Hapus laptop
-    public function destroy($id)
-    {
-        $laptop = Laptop::find($id);
+   public function destroy($id)
+{
+    $laptop = Laptop::find($id);
 
-        if ($laptop) {
-            if ($laptop->image) {
-                Storage::disk('public')->delete($laptop->image);
-            }
-            $laptop->delete();
-            return redirect('/laptop')->with('success', 'Laptop berhasil dihapus');
-        }
-
-        return redirect('/laptop')->with('error', 'Laptop tidak ditemukan');
+    if ($laptop) {
+        // Jangan hapus file fisik dulu
+        $laptop->delete(); // 🟢 ini soft delete
+        return redirect('/laptop')->with('success', 'Laptop berhasil dihapus (soft delete)');
     }
+
+    return redirect('/laptop')->with('error', 'Laptop tidak ditemukan');
+}
+
+public function restore($id)
+{
+    $laptop = Laptop::onlyTrashed()->find($id);
+    if ($laptop) {
+        $laptop->restore();
+        return redirect('/laptop')->with('success', 'Laptop berhasil dikembalikan');
+    }
+    return redirect('/laptop')->with('error', 'Laptop tidak ditemukan');
+}
+
 
     // Toggle status aktif/nonaktif
     public function toggle(Request $request, $id)

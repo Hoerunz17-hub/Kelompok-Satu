@@ -29,6 +29,7 @@ return new class extends Migration
             $table->date('received_date')->nullable();
             $table->date('completed_date')->nullable();
             $table->timestamps();
+             $table->softDeletes(); // 🟢 tambahkan ini
         });
     }
 

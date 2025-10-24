@@ -101,8 +101,9 @@
                                                 $paymentColors[$service->status_paid ?? ''] ?? 'text-secondary';
                                         @endphp
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $service->laptop->model ?? ($service->laptop->name ?? '-') }}</td>
+                                            <td>{{ $service->id }}</td>
+                                            <td>{{ optional($service->laptop)->model ?? (optional($service->laptop)->name ?? '-') }}
+                                            </td>
                                             <td>{{ $service->damage_description ?? '-' }}</td>
                                             <td><span
                                                     class="fw-semibold {{ $color }}">{{ ucfirst($service->status ?? '-') }}</span>
@@ -137,6 +138,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>#</th>
+                                        <th>Nama Customer</th>
                                         <th>Nama Laptop</th>
                                         <th>Kerusakan</th>
                                         <th>Status</th>
@@ -157,8 +159,10 @@
                                             $color = $statusColors[$service->status ?? ''] ?? 'text-secondary';
                                         @endphp
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $service->laptop->model ?? ($service->laptop->name ?? '-') }}</td>
+                                            <td>{{ $service->id }}</td>
+                                            <td>{{ optional($service->customer)->name ?? '-' }}</td>
+                                            <td>{{ optional($service->laptop)->model ?? (optional($service->laptop)->name ?? '-') }}
+                                            </td>
                                             <td>{{ $service->damage_description ?? '-' }}</td>
                                             <td><span
                                                     class="fw-semibold {{ $color }}">{{ ucfirst($service->status ?? '-') }}</span>
