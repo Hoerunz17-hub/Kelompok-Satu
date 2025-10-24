@@ -10,10 +10,15 @@ class DashboardBackendController extends Controller
 {
     public function index()
     {
-        $totalService = Services::count();
+        // === Total Service (termasuk soft deleted) ===
+        $totalService = Services::withTrashed()->count();
         $completedService = Services::where('status', 'finished')->count();
-        $totalCustomer = Usertiga::where('role', 'customer')->count();
-        $totalTechnician = Usertiga::where('role', 'technician')->count();
+
+        // === Total Customer & Technician (termasuk soft deleted) ===
+        $totalCustomer = Usertiga::withTrashed()->where('role', 'customer')->count();
+        $totalTechnician = Usertiga::withTrashed()->where('role', 'technician')->count();
+
+        // === Total Revenue hanya hitung yang aktif ===
         $totalRevenue = Services::sum('paid');
 
         $completedPercent = $totalService ? round(($completedService / $totalService) * 100) : 0;
@@ -48,23 +53,23 @@ class DashboardBackendController extends Controller
             $chartFinished[] = $monthlyFinished[$i] ?? 0;
         }
 
-        // === Chart Brand Laptop ===
-       // === Chart Brand Laptop ===
-$brandData = Services::join('laptops', 'services.laptop_id', '=', 'laptops.id')
-    ->selectRaw('laptops.brand as brand, COUNT(*) as total')
-    ->groupBy('laptops.brand')
-    ->orderByDesc('total')
-    ->get();
+        // === Chart Brand Laptop (termasuk laptop soft deleted) ===
+        $brandData = Services::with(['laptop' => function($q) { $q->withTrashed(); }]) // pastikan relasi laptop termasuk soft deleted
+            ->get()
+            ->groupBy(function($service){
+                return $service->laptop ? $service->laptop->brand : 'Unknown';
+            })
+            ->map(function($group){
+                return $group->count();
+            });
 
-$brandLabels = $brandData->pluck('brand');
-$brandCounts = $brandData->pluck('total');
+        $brandLabels = $brandData->keys();
+        $brandCounts = $brandData->values();
 
-// generate warna random (dalam format hex, misal #36A2EB)
-$brandColors = $brandLabels->map(function () {
-    return sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-});
-
-
+        // generate warna random (dalam format hex)
+        $brandColors = $brandLabels->map(function () {
+            return sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+        });
 
         // === Kirim semua data ke view ===
         return view('pages.dashboard.index', compact(
