@@ -418,5 +418,33 @@
         formatLiveInput(paidInput);
         paidInput.value = '';
         updateCalculations();
+
+        // === Tambahan logika untuk status cancelled ===
+        document.addEventListener("DOMContentLoaded", function() {
+            const serviceStatus = "{{ strtolower($service->status) }}";
+
+            if (serviceStatus === "cancelled") {
+                // Sembunyikan semua form field dari tanggal sampai remaining payment
+                const fieldsToHide = document.querySelectorAll(
+                    'label[for="received_date"], #received_date, ' +
+                    'label[for="completed_date"], #completed_date, ' +
+                    'label[for="paymentmethod"], [name="paymentmethod"], ' +
+                    'label[for="other_cost"], #other_cost, ' +
+                    'label[for="paid"], #paid, ' +
+                    '#remaining_payment'
+                );
+
+                fieldsToHide.forEach(el => {
+                    if (el) el.closest('.form-group, .mb-3, p')?.classList.add('d-none');
+                });
+
+                // Disable tombol Update Payment
+                const updateBtn = document.querySelector('button[type="submit"]');
+                if (updateBtn) updateBtn.disabled = true;
+
+                // Tampilkan alert peringatan
+                alert("Status service ini telah dibatalkan (cancelled). Pembayaran tidak dapat dilakukan.");
+            }
+        });
     </script>
 @endsection
