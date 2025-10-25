@@ -13,12 +13,20 @@
                     <!-- Judul + Tombol Tambah -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">Data Service Item</h4>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Cari Service Item..."
-                            style="width:250px; border-radius:8px; font-size:14px; margin-left:8px;">
-                        <a href="/serviceitem/create" class="btn btn-success"
-                            style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">
-                            + Tambah
-                        </a>
+
+                        <div class="d-flex align-items-center" style="gap:85px;">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Cari Service Item..."
+                                style="width:250px; border-radius:8px; font-size:14px;">
+                            <select id="filterStatus" class="form-control" style="width:180px; border-radius:8px;">
+                                <option value="all">Semua</option>
+                                <option value="active">Aktif</option>
+                                <option value="deleted">Dihapus</option>
+                            </select>
+
+
+                            <a href="/serviceitem/create" class="btn btn-success"
+                                style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">+ Tambah</a>
+                        </div>
                     </div>
 
                     <table class="table table-hover">
@@ -38,31 +46,43 @@
                                 </tr>
                             @endif
                             @foreach ($serviceitems as $serviceitem)
-                                <tr>
+                                <tr data-deleted="{{ $serviceitem->deleted_at ? 'true' : 'false' }}">
                                     <td>{{ $serviceitem->id }}</td>
                                     <td>{{ $serviceitem->service_name }}</td>
                                     <td class="text-end"><strong>Rp
                                             {{ number_format($serviceitem->price, 0, ',', '.') }}</strong></td>
                                     <td>
-                                        <!-- Toggle besar -->
-                                        <label class="switch">
-                                            <input type="checkbox" class="toggle-status" data-id="{{ $serviceitem->id }}"
-                                                {{ $serviceitem->is_active === 'active' ? 'checked' : '' }}>
-                                            <span class="slider round"></span>
-                                        </label>
+                                        @if ($serviceitem->deleted_at)
+                                            <span class="badge badge-deleted">Dihapus</span>
+                                        @else
+                                            <label class="switch">
+                                                <input type="checkbox" class="toggle-status"
+                                                    data-id="{{ $serviceitem->id }}"
+                                                    {{ $serviceitem->is_active === 'active' ? 'checked' : '' }}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        @endif
                                     </td>
 
-                                    <td>
-                                        <a href="/serviceitem/edit/{{ $serviceitem->id }}" class="btn"
-                                            style="background-color:#ffc107; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block;">
-                                            Edit
-                                        </a>
-                                        <a href="javascript:void(0);"
-                                            onclick="confirmDeleteServiceItem({{ $serviceitem->id }})" class="btn"
-                                            style="background-color:#ff4d4d; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block; margin-left:4px;">
-                                            Delete
-                                        </a>
 
+                                    <td>
+                                        @if ($serviceitem->deleted_at)
+                                            <a href="/serviceitem/restore/{{ $serviceitem->id }}"
+                                                class="btn btn-icon-text btn-info">
+                                                <i class="mdi mdi-restore btn-icon-prepend"></i>
+                                                Restore
+                                            </a>
+                                        @else
+                                            <a href="/serviceitem/edit/{{ $serviceitem->id }}" class="btn"
+                                                style="background-color:#ffc107; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block;">
+                                                Edit
+                                            </a>
+                                            <a href="javascript:void(0);"
+                                                onclick="confirmDeleteServiceItem({{ $serviceitem->id }})" class="btn"
+                                                style="background-color:#ff4d4d; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block; margin-left:4px;">
+                                                Delete
+                                            </a>
+                                        @endif
                                     </td>
 
 
@@ -76,6 +96,18 @@
     </div>
 
     <style>
+        .badge-deleted {
+            background-color: #dc3545;
+            /* merah polos */
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            box-shadow: none;
+            /* hilangkan bayangan */
+        }
+
         /* === CSS Toggle === */
         .switch {
             position: relative;
@@ -201,15 +233,15 @@
                 }
             });
         }
-        document.addEventListener("DOMContentLoaded", function() {
 
+        document.addEventListener("DOMContentLoaded", function() {
             // === TOGGLE STATUS ===
             document.querySelectorAll(".toggle-status").forEach(toggle => {
                 toggle.addEventListener("change", function() {
-                    let serviceitemId = this.dataset.id;
+                    let id = this.dataset.id;
                     let status = this.checked ? 1 : 0;
 
-                    fetch(`/serviceitem/toggle/${serviceitemId}`, {
+                    fetch(`/serviceitem/toggle/${id}`, {
                             method: "POST",
                             headers: {
                                 "X-CSRF-TOKEN": "{{ csrf_token() }}",
@@ -220,21 +252,19 @@
                             })
                         })
                         .then(res => res.json())
-                        .then(data => {
-                            console.log("Status updated:", data);
-                        })
+                        .then(data => console.log("Status updated:", data))
                         .catch(err => console.error("Error:", err));
                 });
             });
 
-            // === SEARCH + PAGINATION ===
+            // === SEARCH + FILTER + PAGINATION ===
             const searchInput = document.getElementById("searchInput");
-            const rows = Array.from(document.querySelectorAll("table.table tbody tr"));
+            const filterStatus = document.getElementById("filterStatus");
+            const rows = Array.from(document.querySelectorAll("table tbody tr"));
             const rowsPerPage = 10;
             let currentPage = 1;
-            let filteredRows = [...rows]; // data awal
+            let filteredRows = [...rows];
 
-            // Pagination container
             const pagination = document.createElement("div");
             pagination.className = "d-flex justify-content-between align-items-center mt-3";
             pagination.innerHTML = `
@@ -243,8 +273,7 @@
             <button id="prevBtn" class="btn btn-outline-secondary btn-sm">Prev</button>
             <span id="pageIndicator" class="mx-2 fw-bold">1</span>
             <button id="nextBtn" class="btn btn-outline-secondary btn-sm">Next</button>
-        </div>
-    `;
+        </div>`;
             document.querySelector(".card-body").appendChild(pagination);
 
             const tableInfo = pagination.querySelector("#tableInfo");
@@ -257,15 +286,11 @@
                 const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
                 currentPage = Math.max(1, Math.min(currentPage, totalPages));
 
-                // Sembunyikan semua
                 rows.forEach(r => r.style.display = "none");
-
-                // Tampilkan sesuai halaman
                 const start = (currentPage - 1) * rowsPerPage;
                 const end = start + rowsPerPage;
                 filteredRows.slice(start, end).forEach(r => r.style.display = "");
 
-                // Update info
                 tableInfo.textContent = total ?
                     `Menampilkan ${start + 1} - ${Math.min(end, total)} dari ${total} data` :
                     "Tidak ada data ditemukan";
@@ -274,29 +299,35 @@
                 nextBtn.disabled = currentPage === totalPages || total === 0;
             }
 
+            function applyFilters() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                const filterType = filterStatus.value;
+
+                filteredRows = rows.filter(row => {
+                    const isDeleted = row.dataset.deleted === "true";
+                    const matchesSearch = row.innerText.toLowerCase().includes(keyword);
+                    if (filterType === "deleted") return isDeleted && matchesSearch;
+                    if (filterType === "active") return !isDeleted && matchesSearch;
+                    return matchesSearch;
+                });
+
+                currentPage = 1;
+                renderTable();
+            }
+
+            searchInput.addEventListener("keyup", applyFilters);
+            filterStatus.addEventListener("change", applyFilters);
             prevBtn.addEventListener("click", () => {
                 if (currentPage > 1) currentPage--;
                 renderTable();
             });
-
             nextBtn.addEventListener("click", () => {
                 const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
                 if (currentPage < totalPages) currentPage++;
                 renderTable();
             });
 
-            // === SEARCH FUNCTION ===
-            if (searchInput) {
-                searchInput.addEventListener("keyup", function() {
-                    const keyword = this.value.toLowerCase().trim();
-                    filteredRows = rows.filter(row => row.innerText.toLowerCase().includes(keyword));
-                    currentPage = 1; // reset halaman ke 1 saat cari
-                    renderTable();
-                });
-            }
-
             renderTable();
-
         });
     </script>
 @endsection

@@ -13,13 +13,29 @@
                     <!-- Judul + Tombol Tambah -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">Data Laptop</h4>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Cari laptop..."
-                            style="width:250px; border-radius:8px; font-size:14px; margin-left:8px;">
-                        <a href="/laptop/create" class="btn btn-success"
-                            style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">
-                            + Tambah
-                        </a>
+
+                        <div class="d-flex align-items-center" style="gap:85px;">
+
+                            <input type="text" id="searchInput" class="form-control" placeholder="Cari laptop..."
+                                style="width:250px; border-radius:8px; font-size:14px;">
+
+                            <select id="filterSelect" class="form-control"
+                                style="width:200px; border-radius:8px; font-size:14px;">
+                                <option value="all">Semua Data</option>
+                                <option value="active">Hanya Aktif</option>
+                                <option value="deleted">Hanya Dihapus</option>
+                            </select>
+
+
+
+                            <a href="/laptop/create" class="btn btn-success"
+                                style="font-weight:600; padding:10px 22px; border-radius:8px; font-size:15px;">
+                                + Tambah
+                            </a>
+                        </div>
                     </div>
+
+
 
                     <table class="table table-hover">
                         <thead>
@@ -40,7 +56,8 @@
                                 </tr>
                             @endif
                             @foreach ($laptops as $laptop)
-                                <tr>
+                                <tr data-deleted="{{ $laptop->deleted_at ? 'true' : 'false' }}">
+
                                     <td>{{ $laptop->id }}</td>
                                     <td>
                                         @if ($laptop->image)
@@ -55,32 +72,42 @@
                                     <td>{{ $laptop->model }}</td>
                                     <td>{{ $laptop->release_year }}</td>
 
-
                                     <td>
-                                        <!-- Toggle besar -->
-                                        <label class="switch">
-                                            <input type="checkbox" class="toggle-status" data-id="{{ $laptop->id }}"
-                                                {{ $laptop->is_active === 'active' ? 'checked' : '' }}>
-                                            <span class="slider round"></span>
-                                        </label>
-                                    </td>
-
-                                    <td>
-                                        <a href="/laptop/edit/{{ $laptop->id }}" class="btn"
-                                            style="background-color:#ffc107; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block;">
-                                            Edit
-                                        </a>
-                                        <a href="javascript:void(0);"
-                                            onclick="confirmDelete('/laptop/delete/{{ $laptop->id }}')" class="btn"
-                                            style="background-color:#ff4d4d; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block; margin-left:4px;">
-                                            Delete
-                                        </a>
-
+                                        @if ($laptop->deleted_at)
+                                            <span class="badge badge-deleted">Dihapus</span>
+                                        @else
+                                            <label class="switch">
+                                                <input type="checkbox" class="toggle-status" data-id="{{ $laptop->id }}"
+                                                    {{ $laptop->is_active === 'active' ? 'checked' : '' }}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        @endif
                                     </td>
 
 
+                                    <td>
+                                        @if ($laptop->deleted_at)
+                                            <a href="/laptop/restore/{{ $laptop->id }}"
+                                                class="btn btn-icon-text btn-info">
+                                                <i class="mdi mdi-restore btn-icon-prepend"></i>
+                                                Restore
+                                            </a>
+                                        @else
+                                            <a href="/laptop/edit/{{ $laptop->id }}" class="btn"
+                                                style="background-color:#ffc107; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block;">
+                                                Edit
+                                            </a>
+                                            <a href="javascript:void(0);"
+                                                onclick="confirmDelete('/laptop/delete/{{ $laptop->id }}')"
+                                                class="btn"
+                                                style="background-color:#ff4d4d; border:none; color:white; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; display:inline-block; margin-left:4px;">
+                                                Delete
+                                            </a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
+
                         </tbody>
                     </table>
                 </div>
@@ -89,6 +116,30 @@
     </div>
 
     <style>
+        .badge-deleted {
+            background-color: #dc3545;
+            /* merah polos */
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            box-shadow: none;
+            /* hilangkan bayangan */
+        }
+
+        /* Baris laptop yang di-soft delete */
+        tr[style*="background-color:#f8d7da"] td {
+            font-style: italic;
+            opacity: 0.85;
+        }
+
+        /* Badge status untuk data dihapus */
+        .badge.bg-secondary {
+            background-color: #6c757d !important;
+            font-size: 13px;
+        }
+
         /* === CSS Toggle === */
         .switch {
             position: relative;
@@ -213,6 +264,7 @@
                 }
             });
         }
+
         document.addEventListener("DOMContentLoaded", function() {
 
             // === TOGGLE STATUS ===
@@ -239,8 +291,9 @@
                 });
             });
 
-            // === SEARCH + PAGINATION ===
+            // === SEARCH + PAGINATION + FILTER ===
             const searchInput = document.getElementById("searchInput");
+            const filterSelect = document.getElementById("filterSelect");
             const rows = Array.from(document.querySelectorAll("table.table tbody tr"));
             const rowsPerPage = 10;
             let currentPage = 1;
@@ -300,11 +353,31 @@
             // === SEARCH FUNCTION ===
             searchInput.addEventListener("keyup", function() {
                 const keyword = this.value.toLowerCase().trim();
-                filteredRows = rows.filter(row => row.innerText.toLowerCase().includes(keyword));
-                currentPage = 1; // reset halaman ke 1 saat cari
-                renderTable();
+                applyFilters(keyword, filterSelect.value);
             });
 
+            // === FILTER FUNCTION ===
+            filterSelect.addEventListener("change", function() {
+                const keyword = searchInput.value.toLowerCase().trim();
+                applyFilters(keyword, this.value);
+            });
+
+            function applyFilters(keyword, filterType) {
+                filteredRows = rows.filter(row => {
+                    const isDeleted = row.dataset.deleted === "true";
+                    const matchesSearch = row.innerText.toLowerCase().includes(keyword);
+
+                    if (filterType === "deleted") return isDeleted && matchesSearch;
+                    if (filterType === "active") return !isDeleted && matchesSearch;
+                    return matchesSearch;
+                });
+
+                currentPage = 1;
+                renderTable();
+            }
+
+
+            // Render awal
             renderTable();
         });
     </script>

@@ -15,11 +15,11 @@
                         <h4 class="card-title mb-3 mb-md-0 text-dark fw-bold">Data User</h4>
 
                         <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center" style="gap: 30px; margin-right: 40px;">
+                            <div class="d-flex align-items-center" style="gap: 85px; margin-right: 50px;">
                                 <input type="text" id="searchInput" class="form-control" placeholder="Cari user..."
                                     style="width:250px; border-radius:8px; font-size:14px;">
 
-                                <select id="roleFilter" class="form-select"
+                                <select id="roleFilter" class="form-control"
                                     style="width:220px; border-radius:8px; font-size:14px;">
                                     <option value="">Semua Role</option>
                                     <option value="admin">Admin</option>
