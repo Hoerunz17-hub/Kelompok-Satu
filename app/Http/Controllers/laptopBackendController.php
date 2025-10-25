@@ -12,7 +12,7 @@ class LaptopBackendController extends Controller
     public function index()
     {
 
-        $laptops = Laptop::all();
+        $laptops = Laptop::withTrashed()->get();
         return view('pages.laptop.index', compact('laptops'));
     }
 

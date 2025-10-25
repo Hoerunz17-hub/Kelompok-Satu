@@ -10,7 +10,7 @@ class ServiceitemBackendController extends Controller
     // Tampilkan semua service item
     public function index()
     {
-        $serviceitems = Serviceitem::all();
+        $serviceitems = Serviceitem::withTrashed()->get();
         return view('pages.serviceitem.index', compact('serviceitems'));
     }
 
